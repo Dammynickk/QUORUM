@@ -1,11 +1,33 @@
 import React, { useState } from "react";
-import { CardIcon, BankIcon, UssdIcon, EWalletIcon } from "../../assets/Icon";
-import { BackArrowIcon } from "../../assets/Icon";
-import { useNavigate } from "react-router-dom";
+import {
+  CardIcon,
+  BankIcon,
+  UssdIcon,
+  EWalletIcon,
+  BackArrowIcon,
+} from "../../assets/Icon";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const WalletPay = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [selectedMethod, setSelectedMethod] = useState(null);
+
+  const coins = location.state?.coins || 100;
+  const amount = location.state?.amount || 5000;
+
+  const handlePayment = () => {
+    if (!selectedMethod) return;
+
+    navigate("/payment-process", {
+      state: {
+        coins,
+        amount,
+        paymentMethod: selectedMethod,
+      },
+    });
+  };
 
   return (
     <div className="min-h-screen bg-[#0A0A12] text-[#F8FAFC] px-6 pt-8 pb-24">
@@ -18,15 +40,28 @@ const WalletPay = () => {
       </div>
 
       <div>
-        <h1 className="text-2xl pt-22 font-semibold">Select Payment Method</h1>
+        <h1 className="text-2xl pt-22 font-semibold">
+          Select Payment Method
+        </h1>
+
+        <p className="mt-4 text-gray-400">
+          You are purchasing{" "}
+          <span className="font-semibold text-white">
+            {coins} Coins
+          </span>
+        </p>
+
+        <p className="mt-2 text-[#F4B400] font-semibold text-lg">
+          Amount: NGN {amount.toLocaleString()}
+        </p>
       </div>
 
-      {/* Payment Methods */}
+      {/* Card */}
       <div className="mt-10 space-y-4">
-        {/* Card Payment */}
         <div
           onClick={() => setSelectedMethod("card")}
-          className={`border border-[#7B3FF2] rounded-lg px-4 py-3 text-sm flex items-center justify-between cursor-pointer transition duration-200 `}
+          className={`border border-[#7B3FF2] rounded-lg px-4 py-3 flex items-center justify-between cursor-pointer
+          ${selectedMethod === "card" ? "bg-[#7B3FF2]" : ""}`}
         >
           <div className="flex items-center gap-4">
             <CardIcon />
@@ -40,12 +75,11 @@ const WalletPay = () => {
           />
         </div>
 
-        {/* Bank Transfer */}
+        {/* Bank */}
         <div
           onClick={() => setSelectedMethod("bank")}
-          className={`border border-[#7B3FF2] rounded-lg px-4 py-4 text-sm flex items-center justify-between cursor-pointer transition duration-200 ${
-            selectedMethod === "bank" ? "" : ""
-          }`}
+          className={`border border-[#7B3FF2] rounded-lg px-4 py-3 flex items-center justify-between cursor-pointer
+          ${selectedMethod === "bank" ? "bg-[#7B3FF2]" : ""}`}
         >
           <div className="flex items-center gap-4">
             <BankIcon />
@@ -62,7 +96,8 @@ const WalletPay = () => {
         {/* USSD */}
         <div
           onClick={() => setSelectedMethod("ussd")}
-          className={`border border-[#7B3FF2] rounded-lg px-4 py-3 text-sm flex items-center justify-between cursor-pointer transition duration-200`}
+          className={`border border-[#7B3FF2] rounded-lg px-4 py-3 flex items-center justify-between cursor-pointer
+          ${selectedMethod === "ussd" ? "bg-[#7B3FF2]" : ""}`}
         >
           <div className="flex items-center gap-4">
             <UssdIcon />
@@ -79,7 +114,8 @@ const WalletPay = () => {
         {/* E-Wallet */}
         <div
           onClick={() => setSelectedMethod("ewallet")}
-          className={`border border-[#7B3FF2] rounded-lg px-4 py-3 text-sm flex items-center justify-between cursor-pointer transition duration-200 `}
+          className={`border border-[#7B3FF2] rounded-lg px-4 py-3 flex items-center justify-between cursor-pointer
+          ${selectedMethod === "ewallet" ? "bg-[#7B3FF2]" : ""}`}
         >
           <div className="flex items-center gap-4">
             <EWalletIcon />
@@ -95,16 +131,18 @@ const WalletPay = () => {
       </div>
 
       {/* Pay Button */}
-      <div className="mt-18" onClick={() => navigate("/pay")}>
+      <div className="mt-16">
         <button
+          onClick={handlePayment}
           disabled={!selectedMethod}
-          className={`w-full py-3 rounded-lg font-medium transition ${
+          className={`w-full py-4 rounded-lg font-medium transition
+          ${
             selectedMethod
-              ? "bg-[#7B3FF2] text-base text-white"
+              ? "bg-[#7B3FF2] hover:bg-purple-700 text-white"
               : "bg-gray-600 text-gray-300 cursor-not-allowed"
           }`}
         >
-          Pay NGN5,000
+          Pay NGN {amount.toLocaleString()}
         </button>
       </div>
     </div>
