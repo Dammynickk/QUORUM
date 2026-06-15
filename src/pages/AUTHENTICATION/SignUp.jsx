@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; 
+import axios from "axios";
 import google from "../../assets/Images/google.png"
 
 export default function SignUp() {
@@ -16,7 +17,8 @@ export default function SignUp() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
-
+ 
+  const strength = getPasswordStrength(password);
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const getPasswordStrength = (val) => {
@@ -32,7 +34,7 @@ export default function SignUp() {
     return "Strong";
   };
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     const newErrors = {};
 
     if (!fullName.trim()) newErrors.fullName = "Full name is required.";
@@ -58,14 +60,31 @@ export default function SignUp() {
     if (Object.keys(newErrors).length > 0) return;
 
     setLoading(true);
-    setSuccess("Account created successfully! Redirecting...");
 
-    setTimeout(() => {
-      navigate("/role-select");
-    }, 2000);
+try {
+  const response = await axios.post(
+    "https://quorum-backend-1.onrender.com/auth/register",
+    {
+      name: fullName,
+      email: email,
+      password: password,
+    }
+  );
+
+  setSuccess("Account created successfully!");
+
+  setTimeout(() => {
+    navigate("/sign-in");
+  }, 2000);
+
+} catch (error) {
+    setErrors({
+      api: error.response?.data?.message || "Registration failed",
+    });
+} finally {
+  setLoading(false);
+}
   };
-
-  const strength = getPasswordStrength(password);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0A0A12] text-white px-3">
@@ -79,7 +98,11 @@ export default function SignUp() {
           Join the competition and start <br />
           supporting nominees instantly.
         </p>
-
+          {errors.api && (
+   <div className="mb-4 p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 text-sm">
+    {errors.api}
+  </div>
+   )}
         {/* SUCCESS */}
         {success && (
           <div className="mb-4 p-3 rounded-lg border border-green-500/30 bg-green-500/10 text-green-400 text-sm">
